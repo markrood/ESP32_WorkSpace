@@ -1,0 +1,40 @@
+{
+	"folders": [
+		{
+			"name": "threeWay",
+			"path": "../../PlatformIO/Projects/threeWay"
+		},
+		{
+			"path": "../../PlatformIO/Projects/AtoAwcDoser-2"
+		},
+		{
+			"name": "Ato_Awc",
+			"path": "../../PlatformIO/Projects/Ato_Awc"
+		},
+		{
+			"name": "ThreeWay8266",
+			"path": "../../PlatformIO/Projects/ThreeWay8266"
+		},
+		{
+			"name": "DanesBoat",
+			"path": "../../PlatformIO/Projects/DanesBoat"
+		},
+		{
+			"name": "TestAtoAwc",
+			"path": "../../PlatformIO/Projects/TestAtoAwc"
+		},
+		{
+			"name": "Scoreboard",
+			"path": "../../PlatformIO/Projects/Scoreboard"
+		},
+		{
+			"name": "scoreboard2",
+			"path": "../../PlatformIO/Projects/scoreboard2"
+		},
+		{
+			"name": "Button_1",
+			"path": "../../PlatformIO/Projects/Button_1"
+		}
+	],
+	"settings": {}
+}
