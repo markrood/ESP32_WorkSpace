@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "Esp32_Template",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
