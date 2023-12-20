@@ -7,13 +7,14 @@
 #include <ElegantOTA.h>
 
 #include "fishScheduler.h"
+#include "fbdb.h"
 
 AsyncWebServer server(80);
 DNSServer dns;
 unsigned long ota_progress_millis = 0;
 
 FishSched *mySched;
-
+Database *db;
 
 // put function declarations here:
 void configModeCallback (AsyncWiFiManager *myWiFiManager);
@@ -90,6 +91,8 @@ Serial.begin(115200);
   server.begin();
  WebSerial.begin(&server);
  delay(100);
+  db  = new Database();
+  db->initDb();
  mySched = new FishSched();
  mySched->updateMyTime();
  //TODO need to finish adding all the scheduler stuff  tons
