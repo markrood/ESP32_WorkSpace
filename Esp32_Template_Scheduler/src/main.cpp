@@ -5,6 +5,8 @@
 #include <ESPAsyncWiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <WebSerial.h>
 #include <ElegantOTA.h>
+#include "Effortless_SPIFFS.h"
+
 
 #include "fishScheduler.h"
 #include "fbdb.h"
@@ -12,12 +14,24 @@
 AsyncWebServer server(80);
 DNSServer dns;
 unsigned long ota_progress_millis = 0;
+eSPIFFS fileSystem;
 
 FishSched *mySched;
 Database *db;
 
+int yr = 0;
+String yrStr = "";
+int mo = 0;
+String moStr = "";
+int da = 0;
+String daStr = "";
+bool aFlagWasSetInLoop = false;
+bool blueDosed = false;
+bool midnightDone = false;
+
 // put function declarations here:
 void configModeCallback (AsyncWiFiManager *myWiFiManager);
+void checkDosingSched(int i);
 
 void onOTAStart() {
   // Log when OTA has started
@@ -90,6 +104,16 @@ Serial.begin(115200);
 
   server.begin();
  WebSerial.begin(&server);
+     // Check Flash Size - Always try to incorrperate a check when not debugging to know if you have set the SPIFFS correctly
+    if (!fileSystem.checkFlashConfig()) {
+      Serial.println("Flash size was not correct! Please check your SPIFFS config and try again");
+      delay(100000);
+      ESP.restart();
+    }
+  else{
+    // Create fileSystem with debug output
+    eSPIFFS fileSystem(&Serial);  // Optional - allow the methods to print debug
+  }
  delay(100);
   db  = new Database();
   db->initDb();
@@ -100,6 +124,31 @@ Serial.begin(115200);
 
 void loop() {
   // put your main code here, to run repeatedly:
+  mySched->setNowTime(); //initializes time MUST DO THIS
+  mySched->tick(); //sets hour
+  mySched->tock();//sets minute
+  //Serial.println("Just getting for flag for loop");
+
+  for(int i= 0;i<37;i++){
+      int flagSet = mySched->isFlagSet(i);
+      
+      if(flagSet == 1){
+        aFlagWasSetInLoop = true;
+        //Serial.print("event is: ");
+        //Serial.println(i);
+   mySched->printArray();
+  checkDosingSched(i);
+  mySched->printArray();
+      }
+
+  }
+  if(aFlagWasSetInLoop) {
+    aFlagWasSetInLoop = false;
+  }else {
+    blueDosed = false;
+
+  }
+
   ElegantOTA.loop();
   WebSerial.print(".");
   delay(5000);
@@ -114,4 +163,60 @@ void configModeCallback (AsyncWiFiManager *myWiFiManager) {
   //if you used auto generated SSID, print it
   Serial.println(myWiFiManager->getConfigPortalSSID());
 
+}
+
+void setDate(){
+  mySched->syncTime();
+  yr = mySched->getCurrentYear();
+  yr = yr;
+  yrStr = String(yr);
+  Serial.print("Year is: ");
+  Serial.println(yrStr);
+  mo = mySched->getCurrentMonth();
+  Serial.print("Month is: ");
+  Serial.println(mo);
+
+  da = mySched->getCurrentDay();
+  daStr = String(da-1);  //i need the day for save to db be the day before since i save at midnight
+  Serial.print("YesterDay is: ");
+  Serial.println(daStr);
+ 
+  fileSystem.saveToFile("/curDay.txt", daStr);
+
+}
+
+
+void checkDosingSched(int i){
+    if(db->isThisEventPumpSet(i, 0)){
+      //thisIsAPumpEvent = true;
+      //doseBlue(i);
+    }
+    if (db->isThisEventPumpSet(i, 1)){
+      //thisIsAPumpEvent = true;
+      //doseGreen(i);
+    }
+    if(db->isThisEventPumpSet(i, 2)){
+      //thisIsAPumpEvent = true;
+      //doseYellow(i);
+    }
+    if (db->isThisEventPumpSet(i, 3)){
+      //Serial.println("B+");
+      //thisIsAPumpEvent = true;
+      //dosePurple(i);
+    }
+/*if(notDosing() && !alreadyReset){
+      mySched->setFlag(i,0);
+    }*/
+
+  if(i == 8 && !midnightDone){
+    midnightDone = true;
+    setDate();
+    mySched->setFlag(i,0);
+    mySched->updateMyTime();
+    //writeDailyDosesToDb();
+    WebSerial.print("saved to db");
+  }
+  /*if(!thisIsAPumpEvent){
+    mySched->setFlag(i,0);
+  }*/
 }
