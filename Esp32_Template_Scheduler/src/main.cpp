@@ -6,9 +6,13 @@
 #include <WebSerial.h>
 #include <ElegantOTA.h>
 
+#include "fishScheduler.h"
+
 AsyncWebServer server(80);
 DNSServer dns;
 unsigned long ota_progress_millis = 0;
+
+FishSched *mySched;
 
 
 // put function declarations here:
@@ -86,6 +90,9 @@ Serial.begin(115200);
   server.begin();
  WebSerial.begin(&server);
  delay(100);
+ mySched = new FishSched();
+ mySched->updateMyTime();
+ //TODO need to finish adding all the scheduler stuff  tons
 }
 
 void loop() {
