@@ -5,6 +5,7 @@ int myFunction(int, int);
 
 void setup() {
   // put your setup code here, to run once:
+  //Just setting up github testing
   int result = myFunction(2, 3);
 }
 
